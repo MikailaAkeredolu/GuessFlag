@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var score: Int = 0
+    @State private var questionCount = 0
+    @State private var gameOver = false
 
     //flagtapped method
     func flagtapped(_ number: Int){
@@ -23,18 +25,34 @@ struct ContentView: View {
             score = score + 1
         }else{
             scoreTitle = "Wrong, that is the flag of \(countries[number])"
-            if score > 0{
-                score = score - 1
-            }
         }
         
-        showingScore = true
+        //increase question count
+        questionCount += 1
+        
+       // check if game should end after 10 questions
+        if questionCount == 10{
+            gameOver = true  //show final alert
+        }else{
+            //continue to show normal score alert
+            showingScore = true
+        }
+        
+       
     }
     
     //ask question method
     func askQuestion(){
        countries.shuffle()
        correctAnswer = Int.random(in: 0...2)
+    }
+    
+    //method to restart the game
+    func restartGame(){
+        score = 0
+        questionCount = 0
+        gameOver = false
+        askQuestion()
     }
     
     
@@ -78,7 +96,12 @@ struct ContentView: View {
                 Spacer()
                 Text("score: is \(score) ")
                     .font(.title.bold())
-            Spacer()
+                
+                Text("Question number \(questionCount) out of 10")
+                    .font(.subheadline)
+                    .padding(.top, 5)
+                
+                Spacer()
             }.padding()
             
             
@@ -87,6 +110,12 @@ struct ContentView: View {
             Button("continue", action: askQuestion)
         } message: {
             Text("Your score is \(score) " )
+        }
+        
+        .alert("Game over", isPresented: $gameOver){
+            Button("Restart", action: restartGame)
+        } message: {
+            Text("Your final score is \(score) out of 10")
         }
         
     }
